@@ -7,10 +7,13 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@Transactional
 public class StudentService {
 
     private final StudentRepository studentRepository;
@@ -42,7 +45,7 @@ public class StudentService {
 //        }
 //    }
 
-    public ResponseEntity addStudent(Student student) {
+    public ResponseEntity<Object> addStudent(Student student) {
 //      Option 1: Use List
 //        List<Student> results = studentRepository.emailExisting(student.getEmail());
 
@@ -51,8 +54,15 @@ public class StudentService {
         if (studentEmail.isPresent()){
             return new ResponseEntity("Email already exists.", HttpStatus.BAD_REQUEST);
         }
+
         studentRepository.save(student);
-        return new ResponseEntity("New Student added.", HttpStatus.OK);
+        //return new ResponseEntity("New Student added.", HttpStatus.OK);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of(
+                "name", student.getName(),
+                "email", student.getEmail(),
+                "birthday", student.getBirthday()
+        ));
 
     }
 
@@ -86,12 +96,24 @@ public class StudentService {
         return new ResponseEntity("Student Deleted.", HttpStatus.OK);
     }
 
-    @Transactional
     public ResponseEntity updateStudent(Long studentId, Student student) {
         Student currentStudent = studentRepository.findById(studentId).orElseThrow(RuntimeException::new);
 
+        Optional<Student> studentEmail = studentRepository.findStudentEmail(student.getEmail());
+
+        System.out.println(student.getEmail());
+        System.out.println(currentStudent.getEmail());
+        if (studentEmail.isPresent() && !Objects.equals(student.getEmail(), currentStudent.getEmail())){
+            return new ResponseEntity("Email already exists.", HttpStatus.BAD_REQUEST);
+        }
+
         currentStudent.setName(student.getName() == null ? currentStudent.getName() : student.getName());
+//        if (student.getEmail() == currentStudent.getEmail()){
+//            currentStudent.setEmail(currentStudent.getEmail());
+//        } else {
+//        }
         currentStudent.setEmail(student.getEmail() == null ? currentStudent.getEmail() : student.getEmail());
+
         currentStudent.setBirthday(student.getBirthday() == null ? currentStudent.getBirthday() : student.getBirthday());
 
 

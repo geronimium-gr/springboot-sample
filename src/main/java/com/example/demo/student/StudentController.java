@@ -1,12 +1,14 @@
 package com.example.demo.student;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+@CrossOrigin(origins = "http://localhost:4200/")
 @RestController
 @RequestMapping(path = "api/v1/student")
 public class StudentController {
@@ -28,8 +30,8 @@ public class StudentController {
         return studentService.getStudent(studentId);
     }
 
-    @PostMapping
-    public ResponseEntity createStudent(@RequestBody Student student) {
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> createStudent(@RequestBody Student student) {
         return studentService.addStudent(student);
     }
 
